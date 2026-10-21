@@ -7,10 +7,10 @@ declare
   ba uuid; bb uuid; ca uuid; cb uuid; ia uuid;
   r text[] := '{}'; n int;
 begin
-  insert into auth.users (id, email, aud, role) values
-    (ua, 'a-' || ua || '@test.invalid', 'authenticated', 'authenticated'),
-    (ub, 'b-' || ub || '@test.invalid', 'authenticated', 'authenticated'),
-    (uo, 'op-' || uo || '@test.invalid', 'authenticated', 'authenticated');
+  insert into auth.users (id, email, aud, role, email_confirmed_at) values
+    (ua, 'a-' || ua || '@test.invalid', 'authenticated', 'authenticated', now()),
+    (ub, 'b-' || ub || '@test.invalid', 'authenticated', 'authenticated', now()),
+    (uo, 'op-' || uo || '@test.invalid', 'authenticated', 'authenticated', now());
 
   perform set_config('request.jwt.claims', json_build_object('sub', ua, 'role', 'authenticated')::text, true);
   set local role authenticated;
@@ -47,7 +47,7 @@ begin
   r := r || (case when n = 0 then 'PASS' else 'FAIL' end) || ' B cannot delete A customer (rows ' || n || ')';
 
   begin
-    perform public.add_member_by_email(ba, 'b-' || ub || '@test.invalid', 'owner');
+    perform public.invite_member(ba, 'b-' || ub || '@test.invalid', 'owner');
     r := r || 'FAIL B added itself to A';
   exception when others then r := r || 'PASS B cannot add itself to A';
   end;
@@ -76,7 +76,7 @@ begin
   reset role;
   perform set_config('request.jwt.claims', json_build_object('sub', ua, 'role', 'authenticated')::text, true);
   set local role authenticated;
-  perform public.add_member_by_email(ba, 'op-' || uo || '@test.invalid', 'operator');
+  perform public.invite_member(ba, 'op-' || uo || '@test.invalid', 'operator');
   reset role;
   perform set_config('request.jwt.claims', json_build_object('sub', uo, 'role', 'authenticated')::text, true);
   set local role authenticated;
@@ -86,6 +86,27 @@ begin
   r := r || (case when n = 0 then 'PASS' else 'FAIL' end) || ' operator cannot change business settings (rows ' || n || ')';
   delete from public.invoices where id = ia; get diagnostics n = row_count;
   r := r || (case when n = 0 then 'PASS' else 'FAIL' end) || ' operator cannot delete invoices (rows ' || n || ')';
+
+
+  -- invites: same answer for unknown emails; old lookup function is closed
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', ua, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  begin
+    perform public.invite_member(ba, 'nobody-' || ua || '@test.invalid', 'operator');
+    r := r || 'PASS inviting an unknown email gives no error (no account lookup)';
+  exception when others then r := r || 'FAIL inviting unknown email raised: ' || sqlerrm;
+  end;
+  begin
+    perform public.add_member_by_email(ba, 'x@test.invalid', 'operator');
+    r := r || 'FAIL old add_member_by_email still executable';
+  exception when others then r := r || 'PASS old add_member_by_email is closed';
+  end;
+  begin
+    select count(*) into n from public.invites;
+    r := r || (case when n = 0 then 'PASS' else 'FAIL' end) || ' invites table not readable by users (saw ' || n || ')';
+  exception when others then r := r || 'PASS invites table not readable';
+  end;
 
   reset role;
   raise exception E'RLS REPORT\n%', array_to_string(r, E'\n');

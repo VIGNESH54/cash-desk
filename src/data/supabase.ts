@@ -43,7 +43,7 @@ export async function addMemberByEmail(
   email: string,
   role: 'owner' | 'operator'
 ) {
-  const { error } = await db.rpc('add_member_by_email', { p_business: businessId, p_email: email, p_role: role });
+  const { error } = await db.rpc('invite_member', { p_business: businessId, p_email: email, p_role: role });
   if (error) throw new Error(error.message);
 }
 
