@@ -93,7 +93,10 @@ export default function Settings({ businessId, onSignOut }: { businessId?: strin
         <>
           <h2>Team</h2>
           <div className="card form">
-            <Field label="Add a teammate by email" hint="They must have signed up with this email first.">
+            <Field
+              label="Invite a teammate by email"
+              hint="They sign in with this email. We never confirm whether an email already has an account."
+            >
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </Field>
             <button
@@ -102,14 +105,16 @@ export default function Settings({ businessId, onSignOut }: { businessId?: strin
               onClick={async () => {
                 try {
                   await addMemberByEmail(supabase!, businessId, email.trim(), 'operator');
-                  setMsg('Added.');
+                  setMsg(
+                    'Invitation saved. If that email has an account, or signs up with it, they get access the next time they sign in.'
+                  );
                   setEmail('');
                 } catch (e) {
                   setMsg((e as Error).message);
                 }
               }}
             >
-              Add as operator
+              Send invite
             </button>
             {msg && <p className="sub">{msg}</p>}
           </div>

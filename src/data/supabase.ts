@@ -46,3 +46,12 @@ export async function addMemberByEmail(
   const { error } = await db.rpc('add_member_by_email', { p_business: businessId, p_email: email, p_role: role });
   if (error) throw new Error(error.message);
 }
+
+/** Turns pending invitations for the signed-in, confirmed email into memberships. Never blocks sign-in. */
+export async function claimInvites(db: SupabaseClient): Promise<void> {
+  try {
+    await db.rpc('claim_invites');
+  } catch {
+    /* older database without invites: nothing to claim */
+  }
+}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { checkPassword, MIN_PASSWORD } from '../core/password';
 import { Field } from './ui';
 
 export default function Login({ db, onDemo }: { db: SupabaseClient | null; onDemo(): void }) {
@@ -13,6 +14,14 @@ export default function Login({ db, onDemo }: { db: SupabaseClient | null; onDem
     if (!db) return;
     setBusy(true);
     setMsg('');
+    if (mode === 'up') {
+      const ok = await checkPassword(pw, email);
+      if (!ok.ok) {
+        setBusy(false);
+        setMsg(ok.message);
+        return;
+      }
+    }
     const r =
       mode === 'in'
         ? await db.auth.signInWithPassword({ email, password: pw })
@@ -99,7 +108,7 @@ export default function Login({ db, onDemo }: { db: SupabaseClient | null; onDem
           <Field label="Email">
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
           </Field>
-          <Field label="Password" hint={mode === 'up' ? 'At least 8 characters' : undefined}>
+          <Field label="Password" hint={mode === 'up' ? `At least ${MIN_PASSWORD} characters` : undefined}>
             <input
               type="password"
               value={pw}
@@ -107,7 +116,11 @@ export default function Login({ db, onDemo }: { db: SupabaseClient | null; onDem
               autoComplete={mode === 'in' ? 'current-password' : 'new-password'}
             />
           </Field>
-          <button className="btn primary" disabled={busy || !email.includes('@') || pw.length < 8} onClick={submit}>
+          <button
+            className="btn primary"
+            disabled={busy || !email.includes('@') || pw.length < (mode === 'up' ? MIN_PASSWORD : 1)}
+            onClick={submit}
+          >
             {mode === 'in' ? 'Sign in' : 'Create account'}
           </button>
           {msg && <p className="warn">{msg}</p>}

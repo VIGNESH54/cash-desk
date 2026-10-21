@@ -3,7 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 import { todayISO } from '../core/dates';
 import { DemoRepo } from '../data/demoRepo';
 import { CloudRepo } from '../data/cloudRepo';
-import { listMemberships, supabase, type Membership } from '../data/supabase';
+import { claimInvites, listMemberships, supabase, type Membership } from '../data/supabase';
 import type { Repo } from '../data/repo';
 import { Provider, useApp } from './Store';
 import { configureMonitor } from './monitor';
@@ -120,7 +120,8 @@ export default function App() {
       setBid(null);
       return;
     }
-    listMemberships(supabase)
+    claimInvites(supabase)
+      .then(() => listMemberships(supabase!))
       .then((m) => {
         setMembers(m);
         if (m.length === 1) setBid(m[0]!.businessId);
