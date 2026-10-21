@@ -150,7 +150,8 @@ function lastSentDate(logs: ReminderLog[], customerId: string): IsoDate | undefi
   let last: IsoDate | undefined;
   for (const r of logs) {
     if (r.customerId !== customerId || r.status !== 'sent') continue;
-    const d = r.sentAt.slice(0, 10);
+    // plannedFor is the owner's local (IST) day; sentAt is UTC and can fall on the previous date
+    const d = r.plannedFor;
     if (!last || d > last) last = d;
   }
   return last;
@@ -181,6 +182,8 @@ export function planDay(s: Snapshot, today: IsoDate, opts: PlannerOptions = {}):
   for (const [, vs] of byCustomer) {
     const customer = vs[0].customer;
     if (customer.optedOut) continue;
+    // Sent or skipped today means this customer is handled for today. Skipping must not surface the next rung at once.
+    if (s.reminders.some((r) => r.customerId === customer.id && r.plannedFor === today)) continue;
 
     const last = lastSentDate(s.reminders, customer.id);
     const gap = last ? daysBetween(last, today) : Number.POSITIVE_INFINITY;
@@ -317,7 +320,7 @@ export function attention(s: Snapshot, today: IsoDate): Attention[] {
       continue;
     }
     const sent = s.reminders.filter(
-      (r) => r.customerId === c.id && r.status === 'sent' && r.sentAt.slice(0, 10) >= cutoff
+      (r) => r.customerId === c.id && r.status === 'sent' && r.plannedFor >= cutoff
     ).length;
     const replied = s.events.some((e) => e.customerId === c.id && e.kind === 'reply' && e.at.slice(0, 10) >= cutoff);
     const hasPromise = mine.some((v) => v.activePromise);

@@ -4,7 +4,7 @@
   --paper: #fbf8f1;
   --card: #fff;
   --line: #e4ddcb;
-  --mute: #6b7285;
+  --mute: #575f75;
   --red: #b3261e;
   --amber: #f4c430;
   --green: #1f7a4d;
@@ -631,4 +631,138 @@ th {
 }
 td:first-child {
   min-width: 130px;
+}
+
+.landing {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 36px 18px 60px;
+}
+.hero {
+  display: grid;
+  gap: 36px;
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 56px;
+    padding-top: 30px;
+  }
+}
+.landing h1 {
+  display: block;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  margin: 0.8rem 0 1rem;
+}
+.landing .lede {
+  font-size: 1.08rem;
+}
+.landing .btn.big {
+  max-width: 360px;
+}
+.preview {
+  background: var(--navy);
+  border-radius: 18px;
+  padding: 18px;
+  color: #fff;
+  box-shadow: 0 30px 60px -30px rgba(20, 33, 61, 0.55);
+  transform: rotate(1.2deg);
+}
+.pv-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: #c9d1e3;
+}
+.pv-head b {
+  color: var(--amber);
+}
+.pv-card {
+  background: #fff;
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 14px;
+}
+.pv-card .sub {
+  margin: 2px 0 8px;
+}
+.pv-card pre {
+  white-space: pre-wrap;
+  font-size: 0.8rem;
+  background: #fdfcf7;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0 0 10px;
+}
+.pv-btn {
+  background: var(--navy);
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 9px;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+.pv-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+.pv-stats div {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+}
+.pv-stats span {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #c9d1e3;
+}
+.pv-stats b {
+  font-size: 1.3rem;
+}
+.how {
+  display: grid;
+  gap: 14px;
+  margin: 56px 0 24px;
+}
+@media (min-width: 760px) {
+  .how {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.how div {
+  border-top: 3px solid var(--navy);
+  padding-top: 10px;
+}
+.how p {
+  margin: 0.3rem 0 0;
+  color: #3b4458;
+}
+.honest {
+  max-width: 62ch;
+}
+.signin {
+  max-width: 440px;
+  margin-top: 28px;
+}
+.signin h2 {
+  margin-top: 0;
+}
+.shell {
+  max-width: 860px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .preview {
+    transform: none;
+  }
 }

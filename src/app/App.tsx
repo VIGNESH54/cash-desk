@@ -6,6 +6,7 @@ import { CloudRepo } from '../data/cloudRepo';
 import { listMemberships, supabase, type Membership } from '../data/supabase';
 import type { Repo } from '../data/repo';
 import { Provider, useApp } from './Store';
+import { configureMonitor } from './monitor';
 import { useRoute } from './router';
 import Login from './Login';
 import Onboard from './Onboard';
@@ -28,6 +29,17 @@ const TABS: [string, string][] = [
 
 function Shell({ businessId, onSignOut }: { businessId?: string; onSignOut(): void }) {
   const route = useRoute();
+  const [online, setOnline] = useState(navigator.onLine);
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => {
+      window.removeEventListener('online', on);
+      window.removeEventListener('offline', off);
+    };
+  }, []);
   const { repo, error, clearError, busy, queue } = useApp();
   const [page, arg] = route;
   return (
@@ -37,6 +49,11 @@ function Shell({ businessId, onSignOut }: { businessId?: string; onSignOut(): vo
         {repo.mode === 'demo' && <span className="demo-tag">DEMO · sample data</span>}
         {busy && <span className="sub">Saving…</span>}
       </header>
+      {!online && (
+        <div className="notice" role="status">
+          You are offline. You can read everything, but changes will not save until you reconnect.
+        </div>
+      )}
       {error && (
         <div className="notice err" role="alert">
           {error}{' '}
@@ -128,6 +145,7 @@ export default function App() {
     );
 
   if (demo) {
+    configureMonitor(null, null);
     const repo: Repo = new DemoRepo(todayISO());
     return (
       <Provider initial={repo}>
@@ -163,6 +181,7 @@ export default function App() {
         ))}
       </main>
     );
+  configureMonitor(supabase, bid);
   return (
     <Provider key={bid} initial={new CloudRepo(supabase, bid)}>
       <Shell businessId={bid} onSignOut={() => supabase!.auth.signOut()} />

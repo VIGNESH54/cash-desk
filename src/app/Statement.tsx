@@ -25,7 +25,7 @@ export default function StatementPage({ id }: { id: string }) {
         <br />
         As of {formatDate(s.asOf)}
       </p>
-      <div className="table-wrap">
+      <div className="table-wrap" tabIndex={0} role="region" aria-label="Statement table">
         <table>
           <thead>
             <tr>

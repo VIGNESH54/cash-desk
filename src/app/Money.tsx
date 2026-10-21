@@ -123,7 +123,7 @@ export default function MoneyPage() {
       {rows.length === 0 ? (
         <Empty>No invoices here.</Empty>
       ) : (
-        <div className="card table-wrap">
+        <div className="card table-wrap" tabIndex={0} role="region" aria-label="Invoices table">
           <table>
             <thead>
               <tr>

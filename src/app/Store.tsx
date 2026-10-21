@@ -5,6 +5,17 @@ import { planDay, toLog, type QueueItem } from '../core/planner';
 import type { Customer, Invoice, Snapshot } from '../core/types';
 import { DemoRepo } from '../data/demoRepo';
 import type { Repo } from '../data/repo';
+import { reportError } from './monitor';
+
+/** Turns raw database/network errors into something a shop owner can act on. */
+export function friendly(msg: string): string {
+  if (/failed to fetch|networkerror|load failed/i.test(msg))
+    return 'No internet connection. Your change was not saved. Try again when you are back online.';
+  if (/jwt|not authenticated|permission denied|row-level security/i.test(msg))
+    return 'You were signed out or do not have access. Sign in again.';
+  if (/duplicate key/i.test(msg)) return 'That record already exists.';
+  return msg;
+}
 
 const OFFSET_KEY = 'cashdesk.demo.offset';
 
@@ -64,7 +75,10 @@ export function Provider({ initial, children }: { initial: Repo; children: React
     let live = true;
     r_load(repo)
       .then((s) => live && setSnap(s))
-      .catch((e: Error) => live && setError(e.message));
+      .catch((e: Error) => {
+        reportError(e, 'load');
+        if (live) setError(friendly(e.message));
+      });
     return () => {
       live = false;
     };
@@ -79,7 +93,8 @@ export function Provider({ initial, children }: { initial: Repo; children: React
         await reload(repo);
         return out;
       } catch (e) {
-        setError((e as Error).message);
+        reportError(e, 'save');
+        setError(friendly((e as Error).message));
         return undefined;
       } finally {
         setBusy(false);

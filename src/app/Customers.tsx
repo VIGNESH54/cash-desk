@@ -25,7 +25,13 @@ export function CustomerList() {
           Add
         </button>
       </h1>
-      <input className="search" placeholder="Search customers" value={q} onChange={(e) => setQ(e.target.value)} />
+      <input
+        aria-label="Search customers"
+        className="search"
+        placeholder="Search customers"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+      />
       {rows.length === 0 ? (
         <Empty>No customers match. Import a sheet or add one.</Empty>
       ) : (

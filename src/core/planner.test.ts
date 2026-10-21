@@ -243,3 +243,14 @@ describe('statement of dues', () => {
     expect(st.notes.join(' ')).toMatch(/accountant/);
   });
 });
+
+describe('skipping', () => {
+  it('a skipped message does not bring the next step back the same day', () => {
+    const snap = seedSnapshot(TODAY);
+    const first = planDay(snap, TODAY);
+    expect(first.length).toBeGreaterThan(0);
+    for (const item of first)
+      snap.reminders.push({ ...toLog(item, 'skipped', 'manual', '', `${TODAY}T05:00:00Z`), id: `s-${item.key}` });
+    expect(planDay(snap, TODAY)).toEqual([]);
+  });
+});

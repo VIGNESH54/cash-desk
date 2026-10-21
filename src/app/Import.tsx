@@ -126,6 +126,7 @@ export default function ImportPage() {
       <div className="card form">
         <div className="row wrap">
           <input
+            aria-label="Choose a CSV file"
             type="file"
             accept=".csv,.tsv,.txt,text/csv"
             onChange={(e) => e.target.files?.[0] && readFile(e.target.files[0])}
@@ -223,7 +224,7 @@ export default function ImportPage() {
           {plan.invoices.length === 0 ? (
             <Empty>No usable rows yet. Check the column choices above.</Empty>
           ) : (
-            <div className="card table-wrap">
+            <div className="card table-wrap" tabIndex={0} role="region" aria-label="Import preview">
               <table>
                 <thead>
                   <tr>
