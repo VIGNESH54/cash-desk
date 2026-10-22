@@ -15,7 +15,10 @@ test('the app works under the production Content-Security-Policy', async ({ page
     await route.fulfill({ response: res, headers: { ...res.headers(), 'content-security-policy': csp } });
   });
   await page.goto('/');
-  await page.getByRole('button', { name: /try the demo/i }).click();
+  await page
+    .getByRole('button', { name: /try the demo/i })
+    .first()
+    .click();
   await expect(page.locator('.queue').first()).toBeVisible();
   await page.goto('/#/money');
   await expect(page.locator('.ageing')).toBeVisible();

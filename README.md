@@ -9,12 +9,12 @@ Payment reminders and collections for small suppliers in India. Each morning: a 
     npm i
     npm run dev          # demo mode works with no setup
     npm run check      # typecheck, tests, build
-npm run e2e        # 36 browser tests, phone and desktop (set CHROMIUM_PATH if Chromium is preinstalled)
+npm run e2e        # 48 browser tests, phone and desktop (set CHROMIUM_PATH if Chromium is preinstalled)
 
 Cloud mode: copy `.env.example` to `.env`, fill in the Supabase URL and anon key, and run the SQL in `supabase/migrations/` in order.
 
 ## How it works
-- `src/core`: pure logic (ledger, legal interest, reminder planner, templates, CSV import). 116 unit and simulation tests.
+- `src/core`: pure logic (ledger, legal interest, reminder planner, templates, CSV import). 121 unit and simulation tests.
 - The queue is derived from invoices plus message history, so it is repeatable: same day, same list.
 - One message per customer per day, promise pauses, Sundays skipped, first contact never harsher than "firm".
 - Legal wording (MSMED Act s.15/16, Income-tax s.43B(h)) appears only if: you are a registered micro/small supplier, the customer is a business, and you switched it on for that customer.

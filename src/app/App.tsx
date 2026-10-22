@@ -7,7 +7,8 @@ import { claimInvites, listMemberships, supabase, type Membership } from '../dat
 import type { Repo } from '../data/repo';
 import { Provider, useApp } from './Store';
 import { configureMonitor } from './monitor';
-import { useRoute } from './router';
+import { go, useRoute } from './router';
+import Home from '../site/Home';
 import Login from './Login';
 import Onboard from './Onboard';
 import Today from './Today';
@@ -45,10 +46,18 @@ function Shell({ businessId, onSignOut }: { businessId?: string; onSignOut(): vo
   return (
     <div className="shell">
       <header className="top">
-        <div className="brand">Cash Desk</div>
-        {repo.mode === 'demo' && <span className="demo-tag">DEMO · sample data</span>}
+        <a className="brand" href="#/" aria-label="Cash Desk overview">
+          Cash Desk
+        </a>
+        {repo.mode === 'demo' && <span className="demo-tag">Demo, sample data</span>}
         {busy && <span className="sub">Saving…</span>}
       </header>
+      {repo.mode === 'demo' && (
+        <div className="demo-bar" role="note">
+          <span>You are in a demo. Everything here is sample data, and nothing is really sent.</span>
+          <a href="#/">Back to the overview</a>
+        </div>
+      )}
       {!online && (
         <div className="notice" role="status">
           You are offline. You can read everything, but changes will not save until you reconnect.
@@ -103,6 +112,11 @@ export default function App() {
   const [members, setMembers] = useState<Membership[] | null>(null);
   const [bid, setBid] = useState<string | null>(null);
   const [err, setErr] = useState('');
+  const page = useRoute()[0];
+
+  useEffect(() => {
+    if (session && page === 'signin') go('/today');
+  }, [session, page]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -145,16 +159,33 @@ export default function App() {
       </div>
     );
 
+  const hasApp = demo || !!session;
+  const startDemo = () => {
+    setDemoMode(true);
+    go('/today');
+  };
+  const leaveDemo = () => {
+    setDemoMode(false);
+    go('/');
+  };
+  const signOut = async () => {
+    await supabase?.auth.signOut();
+    go('/');
+  };
+
+  if (page === 'home') return <Home hasApp={hasApp} onDemo={startDemo} onOpenApp={() => go('/today')} />;
+  if (page === 'signin' && !session) return <Login db={supabase} onDemo={startDemo} />;
+
   if (demo) {
     configureMonitor(null, null);
     const repo: Repo = new DemoRepo(todayISO());
     return (
       <Provider initial={repo}>
-        <Shell onSignOut={() => setDemoMode(false)} />
+        <Shell onSignOut={leaveDemo} />
       </Provider>
     );
   }
-  if (!session || !supabase) return <Login db={supabase} onDemo={() => setDemoMode(true)} />;
+  if (!session || !supabase) return <Home hasApp={false} onDemo={startDemo} onOpenApp={() => go('/today')} />;
   if (err)
     return (
       <div className="boot">
@@ -185,7 +216,7 @@ export default function App() {
   configureMonitor(supabase, bid);
   return (
     <Provider key={bid} initial={new CloudRepo(supabase, bid)}>
-      <Shell businessId={bid} onSignOut={() => supabase!.auth.signOut()} />
+      <Shell businessId={bid} onSignOut={signOut} />
     </Provider>
   );
 }

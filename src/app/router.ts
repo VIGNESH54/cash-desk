@@ -5,7 +5,7 @@ export const go = (path: string) => {
 };
 
 export function useRoute(): string[] {
-  const read = () => (window.location.hash.replace(/^#\/?/, '') || 'today').split('?')[0]!.split('/');
+  const read = () => (window.location.hash.replace(/^#\/?/, '') || 'home').split('?')[0]!.split('/');
   const [r, setR] = useState(read);
   useEffect(() => {
     const h = () => setR(read());

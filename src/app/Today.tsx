@@ -102,6 +102,40 @@ function QueueCard({ item }: { item: QueueItem }) {
   );
 }
 
+function Coach() {
+  const [open, setOpen] = useState(() => {
+    try {
+      return localStorage.getItem('cashdesk.coach') !== 'done';
+    } catch {
+      return true;
+    }
+  });
+  if (!open) return null;
+  return (
+    <aside className="coach" aria-label="How this screen works">
+      <strong>How this screen works</strong>
+      <ol>
+        <li>Each card is a message ready for one customer. Read it, and edit it if you like.</li>
+        <li>Tap Open WhatsApp. The chat opens with the message filled in. Send it there.</li>
+        <li>Come back and tap I sent it. The customer leaves today's list and the history is saved.</li>
+      </ol>
+      <button
+        className="btn"
+        onClick={() => {
+          try {
+            localStorage.setItem('cashdesk.coach', 'done');
+          } catch {
+            /* ignore */
+          }
+          setOpen(false);
+        }}
+      >
+        Got it
+      </button>
+    </aside>
+  );
+}
+
 export default function Today() {
   const { queue, snap, today } = useApp();
   const needs = attention(snap, today);
@@ -115,6 +149,7 @@ export default function Today() {
           {weekdayName(today)}, {formatDate(today)}
         </small>
       </h1>
+      <Coach />
       {queue.length === 0 ? (
         <Empty>
           <strong>Nothing to send today.</strong>

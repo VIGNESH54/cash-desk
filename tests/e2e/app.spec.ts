@@ -13,7 +13,10 @@ test.beforeEach(async ({ page }) => {
   await page.route('https://wa.me/**', (r) => r.fulfill({ body: 'ok' }));
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());
-  await page.getByRole('button', { name: /try the demo/i }).click();
+  await page
+    .getByRole('button', { name: /try the demo/i })
+    .first()
+    .click();
   await expect(page.locator('.queue').first()).toBeVisible();
 });
 
