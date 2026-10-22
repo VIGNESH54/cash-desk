@@ -118,6 +118,17 @@ export default function App() {
     if (session && page === 'signin') go('/today');
   }, [session, page]);
 
+  // A real account always wins over the demo: signing in leaves demo mode for good.
+  useEffect(() => {
+    if (!session) return;
+    try {
+      localStorage.removeItem(DEMO_FLAG);
+    } catch {
+      /* ignore */
+    }
+    setDemo(false);
+  }, [session]);
+
   useEffect(() => {
     if (!supabase) return;
     supabase.auth.getSession().then(({ data }) => {
@@ -176,7 +187,7 @@ export default function App() {
   if (page === 'home') return <Home hasApp={hasApp} onDemo={startDemo} onOpenApp={() => go('/today')} />;
   if (page === 'signin' && !session) return <Login db={supabase} onDemo={startDemo} />;
 
-  if (demo) {
+  if (demo && !session) {
     configureMonitor(null, null);
     const repo: Repo = new DemoRepo(todayISO());
     return (
